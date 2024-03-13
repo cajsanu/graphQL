@@ -4,17 +4,17 @@ import { ALL_BOOKS } from "../queries";
 const Book = ({ book }) => {
   return (
     <li>
-      {book.title} by {book.author}
+      {book.title} by {book.author.name}
       <div>in {book.published}</div>
+      <div>genres: {book.genres}</div>
     </li>
   );
 };
 
 export const Books = () => {
   const result = useQuery(ALL_BOOKS);
-  console.log(result);
 
-  if (result.loading) {
+  if (result.loading || result.data === undefined) {
     return <div>Loading...</div>;
   }
   const books = result.data.allBooks;

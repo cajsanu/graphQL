@@ -86,7 +86,8 @@ const resolvers = {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      return Book.find({});
+      const res = await Book.find({}).populate("author");
+      return res;
       //   const booksByAuthor = books.filter((b) => b.author === args.author);
       //   const booksByGenre = books.filter((b) => b.genres.includes(args.genre));
 
@@ -102,7 +103,6 @@ const resolvers = {
       return Author.find({});
     },
     me: async (root, args, context) => {
-      console.log("here", context);
       return context.currentUser;
     },
   },
@@ -114,17 +114,29 @@ const resolvers = {
   },
   Mutation: {
     addBook: async (root, args, context) => {
-      if (!context.username) {
+      if (!context.currentUser) {
         throw new GraphQLError("Not authenticated", {
           extensions: {
             code: "NOT_AUTHENTICATED",
           },
         });
       }
-      const book = new Book({ ...args });
+
+      const author = await Author.findOne({ name: args.author });
+
+      if (!author) {
+        const newAuthor = new Author({ name: args.author });
+        await newAuthor.save();
+      }
+
+      const authorFromDB =
+        author ?? (await Author.findOne({ name: args.author }));
+      const book = new Book({ ...args, author: authorFromDB._id });
+
       try {
         await book.save();
       } catch (error) {
+        console.log(error);
         throw new GraphQLError("Adding book failed", {
           extensions: {
             code: "BAD_USER_INPUT",
@@ -133,10 +145,11 @@ const resolvers = {
           },
         });
       }
-      return book;
+      const bookWithAuthor = await book.populate("author")
+      return bookWithAuthor;
     },
-    addAuthor: async (root, args) => {
-      if (!context.username) {
+    addAuthor: async (root, args, context) => {
+      if (!context.currentUser) {
         throw new GraphQLError("Not authenticated", {
           extensions: {
             code: "NOT_AUTHENTICATED",
@@ -157,8 +170,8 @@ const resolvers = {
       }
       return author;
     },
-    editAuthor: async (root, args) => {
-      if (!context.username) {
+    editAuthor: async (root, args, context) => {
+      if (!context.currentUser) {
         throw new GraphQLError("Not authenticated", {
           extensions: {
             code: "NOT_AUTHENTICATED",
