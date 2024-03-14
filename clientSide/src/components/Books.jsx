@@ -1,19 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { ALL_BOOKS, ALL_GENRES } from "../queries";
-import { useEffect, useState } from "react";
-
-const Genre = ({ genre, setGenre }) => {
-  const handleGenre = (event) => {
-    setGenre(event.target.value);
-  };
-  return (
-    <div>
-      <button onClick={handleGenre} value={genre}>
-        {genre}
-      </button>
-    </div>
-  );
-};
+import { ALL_BOOKS } from "../queries";
 
 const Book = ({ book }) => {
   return (
@@ -24,15 +10,7 @@ const Book = ({ book }) => {
   );
 };
 
-export const Books = ({ faveGenre }) => {
-  const [genre, setGenre] = useState(null);
-
-  useEffect(() => {
-    if (faveGenre) {
-      setGenre(faveGenre)
-    }
-  }, [faveGenre])
-
+export const Books = ({genre}) => {
   const bookResult =
     !genre || genre === "All genres"
       ? useQuery(ALL_BOOKS)
@@ -40,15 +18,10 @@ export const Books = ({ faveGenre }) => {
           variables: { genre },
         });
 
-  const genreResult = useQuery(ALL_GENRES)
-
-  if (bookResult.loading || bookResult.data === undefined || genreResult.loading) {
+  if (bookResult.loading || bookResult.data === undefined) {
     return <div>Loading...</div>;
   }
   const books = bookResult.data.allBooks;
-  const genres = genreResult.data.allGenres
-  console.log(genres)
-
 
   return (
     <div>
@@ -56,10 +29,6 @@ export const Books = ({ faveGenre }) => {
       <h3>Showing books with {genre ? genre : "All genres"} </h3>
       {books.map((book) => (
         <Book key={book.id} book={book} />
-      ))}
-      <h3>Genres</h3>
-      {genres.map((g) => (
-        <Genre setGenre={setGenre} key={g} genre={g} />
       ))}
     </div>
   );
