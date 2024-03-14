@@ -34,6 +34,9 @@ export const NavBar = () => {
       <Link style={style} to="/newBook">
         Add new book
       </Link>
+      <Link style={style} to="/recommendations">
+        Recommendations
+      </Link>
     </div>
   );
 };

@@ -14,6 +14,7 @@ import { BooksPage } from "./routes/BooksPage";
 import { NewBookPage } from "./routes/NewBookPage";
 import { LoginPage } from "./routes/LoginPage";
 import { TokenContextProvider } from "../TokenContext";
+import { RecommendationsPage } from "./routes/RecommendationsPage";
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem("loggedInUser");
@@ -55,7 +56,11 @@ const router = createBrowserRouter([
     element: <NewBookPage />,
     errorElement: <ErrorPage />,
   },
-
+  {
+    path: "recommendations",
+    element: <RecommendationsPage />,
+    errorElement: <ErrorPage />,
+  },
   {
     path: "/login",
     element: <LoginPage />,

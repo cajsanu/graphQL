@@ -49,7 +49,8 @@ type Token {
 type Query {
     bookCount: Int!
     authorCount: Int!
-    allBooks: [Book!]!
+    allBooks(genre: String): [Book!]!
+    allGenres: [String!]!
     allAuthors: [Author!]!
     me: User
     }
@@ -86,24 +87,25 @@ const resolvers = {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      const res = await Book.find({}).populate("author");
-      return res;
-      //   const booksByAuthor = books.filter((b) => b.author === args.author);
-      //   const booksByGenre = books.filter((b) => b.genres.includes(args.genre));
-
-      //   if (args.author && args.genre) {
-      //     return booksByAuthor.filter((b) => b.genres.includes(args.genre));
-      //   }
-      //   if (args.author || args.genre) {
-      //     return args.author ? booksByAuthor : booksByGenre;
-      //   }
-      //   return books;
+      const books = await Book.find({}).populate("author");
+      if (args.genre) {
+        return books.filter((b) => b.genres.includes(args.genre));
+      }
+      return books;
+    },
+    allGenres: async () => {
+      const books = await Book.find({});
+      const uniqueArray = [
+        ...new Set([].concat(...books.map((b) => b.genres), "All genres")),
+      ];
+      // The new Set makes an array where there is no duplicates. [].concat adds all the genres in an empty
+      return uniqueArray;
     },
     allAuthors: async () => {
       return Author.find({});
     },
     me: async (root, args, context) => {
-      return context.currentUser;
+      return context?.currentUser;
     },
   },
   Author: {
@@ -145,7 +147,7 @@ const resolvers = {
           },
         });
       }
-      const bookWithAuthor = await book.populate("author")
+      const bookWithAuthor = await book.populate("author");
       return bookWithAuthor;
     },
     addAuthor: async (root, args, context) => {
