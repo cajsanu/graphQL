@@ -1,8 +1,8 @@
-import { useMutation } from "@apollo/client";
+import { useMutation, useSubscription } from "@apollo/client";
 import { CREATE_BOOK } from "../queries";
 import { useField } from "../hooks";
 import { useState } from "react";
-import { ALL_BOOKS } from "../queries";
+import { ALL_BOOKS, BOOK_ADDED } from "../queries";
 import { ALL_AUTHORS } from "../queries";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +20,13 @@ export const AddBook = () => {
       console.log("ERROR", error);
     },
   });
+
+  // useSubscription(BOOK_ADDED, {
+  //   onError: (error) => console.log(error),
+  //   onData: ({ data }) => {
+  //     console.log(data)
+  //   }
+  // })
 
   const addBook = (event) => {
     console.log(genres);

@@ -1,5 +1,6 @@
-import { useQuery } from "@apollo/client";
-import { ALL_BOOKS } from "../queries";
+import { useApolloClient, useQuery } from "@apollo/client";
+import { ALL_BOOKS, BOOK_ADDED } from "../queries";
+import { useSubscription } from "@apollo/client";
 
 const Book = ({ book }) => {
   return (
@@ -10,13 +11,25 @@ const Book = ({ book }) => {
   );
 };
 
-export const Books = ({genre}) => {
-  const bookResult =
-    !genre || genre === "All genres"
-      ? useQuery(ALL_BOOKS)
-      : useQuery(ALL_BOOKS, {
-          variables: { genre },
-        });
+export const Books = ({ genre }) => {
+  const client = useApolloClient()
+
+  const bookResult = useQuery(ALL_BOOKS, {
+    variables: !genre || genre === "All genres" ? {} : { genre },
+  });
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded
+      window.alert(`A new book called ${addedBook.title} was added to the collection`)
+      client.cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return {
+          allBooks: allBooks.concat(addedBook),
+        }
+      })
+    },
+    onError: (error) => console.log(error),
+  })
 
   if (bookResult.loading || bookResult.data === undefined) {
     return <div>Loading...</div>;
