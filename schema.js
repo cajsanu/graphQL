@@ -9,7 +9,7 @@ type Book {
 type Author {
     name: String!
     born: Int
-    bookCount: Int!
+    books: [Book]
     }
 type User {
     username: String!

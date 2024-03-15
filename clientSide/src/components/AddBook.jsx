@@ -21,13 +21,6 @@ export const AddBook = () => {
     },
   });
 
-  // useSubscription(BOOK_ADDED, {
-  //   onError: (error) => console.log(error),
-  //   onData: ({ data }) => {
-  //     console.log(data)
-  //   }
-  // })
-
   const addBook = (event) => {
     console.log(genres);
     event.preventDefault();

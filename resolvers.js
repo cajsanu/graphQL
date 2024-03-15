@@ -27,18 +27,22 @@ const resolvers = {
       return uniqueArray;
     },
     allAuthors: async () => {
-      return Author.find({});
+      console.log("author");
+      const authors = await Author.find({}).populate("books", { title: 1,  });
+      console.log(authors);
+      return authors;
     },
     me: async (root, args, context) => {
       return context?.currentUser;
     },
   },
-  Author: {
-    bookCount: async (root) => {
-      const books = await Book.find({ author: root._id });
-      return books.length;
-    },
-  },
+  // Author: {
+  //   bookCount: async (root) => {
+  //     console.log("count")
+  //     const books = await Book.find({ author: root._id });
+  //     return books.length;
+  //   },
+  // },
   Subscription: {
     bookAdded: {
       subscribe: () => pubsub.asyncIterator("BOOK_ADDED"),
@@ -77,6 +81,12 @@ const resolvers = {
           },
         });
       }
+      const updatedAuthor = await Author.findByIdAndUpdate(
+        authorFromDB._id,
+        { $push: { books: book._id } },
+        { new: true }
+      );
+      const authorWithBook = await updatedAuthor.populate("books")
       const bookWithAuthor = await book.populate("author");
       pubsub.publish("BOOK_ADDED", { bookAdded: bookWithAuthor });
       return bookWithAuthor;

@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useApolloClient } from "@apollo/client";
 import { NavBar } from "../components/NavBar";
 import TokenContext from "../../TokenContext";
-import { BOOK_ADDED } from "../queries";
 
 function App() {
   const client = useApolloClient();
